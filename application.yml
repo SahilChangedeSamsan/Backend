@@ -1,0 +1,2 @@
+jwt:
+  secret: ${JWT_SECRET:MySuperSecureJwtSecretKeyThatIsLongEnoughAnd64Chars1234567890}
