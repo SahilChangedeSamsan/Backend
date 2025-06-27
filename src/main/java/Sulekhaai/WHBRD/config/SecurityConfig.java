@@ -34,25 +34,20 @@ public class SecurityConfig {
             .cors(cors -> cors.configurationSource(corsConfigurationSource()))
             .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(auth -> auth
-                // ✅ Public endpoints
-                .requestMatchers("/", "/index.html").permitAll() // ✅ Allow root access
-                .requestMatchers("/auth/**", "/test-connection", "/send-otp", "/verify-otp").permitAll()
+                // ✅ Public endpoints including root and auth
+                .requestMatchers("/", "/index.html").permitAll()
+                .requestMatchers("/auth/**", "/test-connection", "/send-otp", "/verify-otp", "/auth/google").permitAll()
                 .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
 
-                // ✅ Allow image stream proxy from Pi + frontend
+                // ✅ Camera stream endpoints
                 .requestMatchers(HttpMethod.GET, "/api/proxy/stream").permitAll()
                 .requestMatchers(HttpMethod.POST, "/api/proxy/stream").permitAll()
-
-                // ✅ Flask fallback if needed
                 .requestMatchers("/stream/**").permitAll()
 
-                // ✅ Allow camera disconnect POST
+                // ✅ Device disconnect
                 .requestMatchers(HttpMethod.POST, "/api/disconnect_camera").hasAnyAuthority("ROLE_USER", "ROLE_ADMIN")
 
-                // ✅ Google login
-                .requestMatchers("/auth/google").permitAll()
-
-                // 🔐 Protected endpoints
+                // 🔐 Protected routes
                 .requestMatchers("/api/cameras/connected/**").hasAnyAuthority("ROLE_USER", "ROLE_ADMIN")
                 .requestMatchers(
                     "/dashboard/**",
@@ -65,7 +60,7 @@ public class SecurityConfig {
                     "/api/logs/**"
                 ).hasAnyAuthority("ROLE_USER", "ROLE_ADMIN")
 
-                // 🔐 All other requests require authentication
+                // 🔐 Any other request requires authentication
                 .anyRequest().authenticated()
             );
 
@@ -85,8 +80,9 @@ public class SecurityConfig {
             "http://192.168.1.63:5173",
             "http://192.168.1.63:3000",
 
-            // ✅ Netlify deployed frontend
-            "https://sulekha-ai.netlify.app"
+            // ✅ Production frontend and backend
+            "https://sulekha-ai.netlify.app",
+            "https://backend-gwq0.onrender.com"
         ));
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         config.setAllowedHeaders(List.of("Authorization", "Content-Type", "Accept"));
