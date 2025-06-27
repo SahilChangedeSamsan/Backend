@@ -35,6 +35,7 @@ public class SecurityConfig {
             .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(auth -> auth
                 // ✅ Public endpoints
+                .requestMatchers("/", "/index.html").permitAll() // ✅ Allow root access
                 .requestMatchers("/auth/**", "/test-connection", "/send-otp", "/verify-otp").permitAll()
                 .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
 
