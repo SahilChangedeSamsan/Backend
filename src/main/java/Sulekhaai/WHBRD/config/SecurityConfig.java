@@ -34,20 +34,20 @@ public class SecurityConfig {
             .cors(cors -> cors.configurationSource(corsConfigurationSource()))
             .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(auth -> auth
-                // ✅ Public endpoints including root and auth
-                .requestMatchers("/", "/index.html").permitAll()
-                .requestMatchers("/auth/**", "/test-connection", "/send-otp", "/verify-otp", "/auth/google").permitAll()
+                // ✅ Public endpoints
+                .requestMatchers("/", "/index.html", "/error").permitAll()
+                .requestMatchers("/auth/**", "/test-connection", "/send-otp", "/verify-otp").permitAll()
                 .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
 
-                // ✅ Camera stream endpoints
+                // ✅ Stream endpoints
+                .requestMatchers("/stream/**").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/proxy/stream").permitAll()
                 .requestMatchers(HttpMethod.POST, "/api/proxy/stream").permitAll()
-                .requestMatchers("/stream/**").permitAll()
 
-                // ✅ Device disconnect
-                .requestMatchers(HttpMethod.POST, "/api/disconnect_camera").hasAnyAuthority("ROLE_USER", "ROLE_ADMIN")
+                // ✅ Device actions
+                .requestMatchers("/api/disconnect_camera").hasAnyAuthority("ROLE_USER", "ROLE_ADMIN")
 
-                // 🔐 Protected routes
+                // 🔐 Authenticated APIs
                 .requestMatchers("/api/cameras/connected/**").hasAnyAuthority("ROLE_USER", "ROLE_ADMIN")
                 .requestMatchers(
                     "/dashboard/**",
@@ -60,7 +60,7 @@ public class SecurityConfig {
                     "/api/logs/**"
                 ).hasAnyAuthority("ROLE_USER", "ROLE_ADMIN")
 
-                // 🔐 Any other request requires authentication
+                // 🔐 Catch-all
                 .anyRequest().authenticated()
             );
 
@@ -72,15 +72,12 @@ public class SecurityConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
         config.setAllowedOrigins(List.of(
-            // ✅ Local development
+            // Local dev
             "http://localhost:5173",
             "http://localhost:3000",
             "http://127.0.0.1:5173",
             "http://127.0.0.1:3000",
-            "http://192.168.1.63:5173",
-            "http://192.168.1.63:3000",
-
-            // ✅ Production frontend and backend
+            // Production
             "https://sulekha-ai.netlify.app",
             "https://backend-gwq0.onrender.com"
         ));
