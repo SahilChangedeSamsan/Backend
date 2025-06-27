@@ -33,7 +33,6 @@ public class SecurityConfig {
             .csrf(csrf -> csrf.disable())
             .cors(cors -> cors.configurationSource(corsConfigurationSource()))
             .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-            
             .authorizeHttpRequests(auth -> auth
                 // ✅ Public endpoints
                 .requestMatchers("/auth/**", "/test-connection", "/send-otp", "/verify-otp").permitAll()
@@ -49,8 +48,10 @@ public class SecurityConfig {
                 // ✅ Allow camera disconnect POST
                 .requestMatchers(HttpMethod.POST, "/api/disconnect_camera").hasAnyAuthority("ROLE_USER", "ROLE_ADMIN")
 
+                // ✅ Google login
                 .requestMatchers("/auth/google").permitAll()
-                // 🔐 Other protected endpoints
+
+                // 🔐 Protected endpoints
                 .requestMatchers("/api/cameras/connected/**").hasAnyAuthority("ROLE_USER", "ROLE_ADMIN")
                 .requestMatchers(
                     "/dashboard/**",
@@ -67,7 +68,6 @@ public class SecurityConfig {
                 .anyRequest().authenticated()
             );
 
-
         http.addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
         return http.build();
     }
@@ -76,12 +76,16 @@ public class SecurityConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
         config.setAllowedOrigins(List.of(
+            // ✅ Local development
             "http://localhost:5173",
             "http://localhost:3000",
             "http://127.0.0.1:5173",
             "http://127.0.0.1:3000",
             "http://192.168.1.63:5173",
-            "http://192.168.1.63:3000"
+            "http://192.168.1.63:3000",
+
+            // ✅ Netlify deployed frontend
+            "https://sulekha-ai.netlify.app"
         ));
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         config.setAllowedHeaders(List.of("Authorization", "Content-Type", "Accept"));
