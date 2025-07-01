@@ -29,24 +29,26 @@ public class WebSocketInterceptor implements HandshakeInterceptor {
             @NonNull Map<String, Object> attributes) {
 
         if (request instanceof ServletServerHttpRequest servletRequest) {
-            HttpServletRequest httpRequest = servletRequest.getServletRequest();
-            String token = httpRequest.getParameter("token");
+            HttpServletRequest httpReq = servletRequest.getServletRequest();
+            String token = httpReq.getParameter("token");
 
             if (token != null && jwtUtil.validateToken(token)) {
-                // ✅ Extract values and add to WebSocket session attributes
-                Long userId = jwtUtil.extractUserId(token);
-                String username = jwtUtil.extractUsername(token);
-                String role = jwtUtil.extractUserRole(token);
+                try {
+                    Long userId = jwtUtil.extractUserId(token);
+                    String role = jwtUtil.extractUserRole(token);
+                    String email = jwtUtil.extractEmail(token);
 
-                attributes.put("userId", userId);
-                attributes.put("username", username);
-                attributes.put("role", role);
+                    attributes.put("userId", userId);
+                    attributes.put("role", role);
+                    attributes.put("email", email); // Optional, if you need it later
 
-                return true;
+                    return true;
+                } catch (Exception e) {
+                    System.out.println("Token validation error: " + e.getMessage());
+                }
             }
         }
 
-        // ❌ Reject the connection if token is invalid or missing
         response.setStatusCode(HttpStatus.FORBIDDEN);
         return false;
     }
