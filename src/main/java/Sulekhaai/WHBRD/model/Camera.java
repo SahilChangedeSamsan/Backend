@@ -1,16 +1,10 @@
 package Sulekhaai.WHBRD.model;
 
 import jakarta.persistence.*;
-import lombok.*;
-
 import java.util.HashSet;
 import java.util.Set;
 
 @Entity
-@Table(name = "camera")
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
 public class Camera {
 
     @Id
@@ -21,16 +15,33 @@ public class Camera {
     private String cameraId;
 
     private String deviceName;
-
     private boolean active;
-
     private boolean online;
 
-    @ManyToMany
-    @JoinTable(
-        name = "camera_user_link",
-        joinColumns = @JoinColumn(name = "camera_id"),
-        inverseJoinColumns = @JoinColumn(name = "user_id")
-    )
+    @ManyToMany(mappedBy = "cameras")
     private Set<UserEntity> users = new HashSet<>();
+
+    public Long getId() { return id; }
+
+    public void setId(Long id) { this.id = id; }
+
+    public String getCameraId() { return cameraId; }
+
+    public void setCameraId(String cameraId) { this.cameraId = cameraId; }
+
+    public String getDeviceName() { return deviceName; }
+
+    public void setDeviceName(String deviceName) { this.deviceName = deviceName; }
+
+    public boolean isActive() { return active; }
+
+    public void setActive(boolean active) { this.active = active; }
+
+    public boolean isOnline() { return online; }
+
+    public void setOnline(boolean online) { this.online = online; }
+
+    public Set<UserEntity> getUsers() { return users; }
+
+    public void setUsers(Set<UserEntity> users) { this.users = users; }
 }

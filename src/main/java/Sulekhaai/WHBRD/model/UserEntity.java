@@ -1,16 +1,10 @@
 package Sulekhaai.WHBRD.model;
 
 import jakarta.persistence.*;
-import lombok.*;
-
 import java.util.HashSet;
 import java.util.Set;
 
 @Entity
-@Table(name = "users")
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
 public class UserEntity {
 
     @Id
@@ -21,11 +15,38 @@ public class UserEntity {
     private String email;
 
     private String name;
-
     private String password;
-
     private String role;
 
-    @ManyToMany(mappedBy = "users", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @ManyToMany
+    @JoinTable(
+        name = "user_camera",
+        joinColumns = @JoinColumn(name = "user_id"),
+        inverseJoinColumns = @JoinColumn(name = "camera_id")
+    )
     private Set<Camera> cameras = new HashSet<>();
+
+    public Long getId() { return id; }
+
+    public void setId(Long id) { this.id = id; }
+
+    public String getEmail() { return email; }
+
+    public void setEmail(String email) { this.email = email; }
+
+    public String getName() { return name; }
+
+    public void setName(String name) { this.name = name; }
+
+    public String getPassword() { return password; }
+
+    public void setPassword(String password) { this.password = password; }
+
+    public String getRole() { return role; }
+
+    public void setRole(String role) { this.role = role; }
+
+    public Set<Camera> getCameras() { return cameras; }
+
+    public void setCameras(Set<Camera> cameras) { this.cameras = cameras; }
 }
