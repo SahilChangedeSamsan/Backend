@@ -1,6 +1,5 @@
 package Sulekhaai.WHBRD.repository;
 
-
 import Sulekhaai.WHBRD.model.UserEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 

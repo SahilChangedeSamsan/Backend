@@ -2,6 +2,8 @@ package Sulekhaai.WHBRD.model;
 
 import jakarta.persistence.*;
 import lombok.*;
+import java.util.HashSet;
+import java.util.Set;
 
 @Entity
 @Data
@@ -18,4 +20,7 @@ public class User {
     private String name;
     private String password;
     private String role;
+
+    @ManyToMany(mappedBy = "users")
+    private Set<Camera> cameras = new HashSet<>();
 }

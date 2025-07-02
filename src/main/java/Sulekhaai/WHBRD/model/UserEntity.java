@@ -1,27 +1,31 @@
 package Sulekhaai.WHBRD.model;
 
 import jakarta.persistence.*;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.AllArgsConstructor;
+import lombok.*;
+
+import java.util.HashSet;
+import java.util.Set;
 
 @Entity
+@Table(name = "users")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "user_entity")
 public class UserEntity {
-    
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(unique = true, nullable = false)
+    @Column(unique = true)
     private String email;
-
-    private String password; // Optional for Google users
 
     private String name;
 
+    private String password;
+
     private String role;
+
+    @ManyToMany(mappedBy = "users", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private Set<Camera> cameras = new HashSet<>();
 }
