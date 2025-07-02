@@ -114,7 +114,7 @@ public class CameraService {
      */
     public boolean disconnectCamera(Map<String, Object> req) {
         try {
-            String cameraId = req.get("camera_id").toString();
+            String cameraId = req.get("cameraId").toString();
             Long userId = Long.parseLong(req.get("userId").toString());
 
             Optional<Camera> cameraOpt = cameraRepo.findByCameraId(cameraId);
