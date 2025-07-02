@@ -6,8 +6,6 @@ import java.util.List;
 import java.util.Optional;
 
 public interface CameraRepository extends JpaRepository<Camera, Long> {
-    List<Camera> findByUserId(Long userId);
-
-    // ✅ Add this method to support disconnecting via string-based cameraId
+    // Removed findByUserId(Long userId) because Camera does not have a userId field
     Optional<Camera> findByCameraId(String cameraId);
 }
