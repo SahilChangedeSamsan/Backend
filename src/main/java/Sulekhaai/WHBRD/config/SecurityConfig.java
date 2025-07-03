@@ -52,7 +52,7 @@ public class SecurityConfig {
                 .requestMatchers("/api/disconnect_camera").hasAnyAuthority("ROLE_USER", "ROLE_ADMIN")
 
                 //CHATGPT
-                .requestMatchers(HttpMethod.POST, "/chat").authenticated()
+                //.requestMatchers(HttpMethod.POST, "/chat").authenticated()
                 // ✅ Authenticated APIs
                 .requestMatchers("/api/cameras/connected/**").hasAnyAuthority("ROLE_USER", "ROLE_ADMIN")
                 .requestMatchers(
