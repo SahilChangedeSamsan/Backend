@@ -1,15 +1,18 @@
-// UserSettings.java
 package Sulekhaai.WHBRD.model;
 
 import jakarta.persistence.*;
 import lombok.Data;
-import java.time.LocalDateTime;
 
 @Entity
+@Table(name = "user_settings")
 @Data
 public class UserSettings {
+
     @Id
-    private String email;                 // primary key
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    private String email;
     private String firstName;
     private String lastName;
     private String mobile;
@@ -35,7 +38,7 @@ public class UserSettings {
     private boolean autoLogout;
     private String storagePref;
     private boolean cloudSyncEnabled;
-    private LocalDateTime lastSynced;
+    private String lastSynced;
     private String syncStatus;
     private String syncFrequency;
 }
