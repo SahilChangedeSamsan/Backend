@@ -37,9 +37,11 @@ public class SecurityConfig {
                 // ✅ Public endpoints
                 .requestMatchers("/", "/index.html", "/error").permitAll()
                 .requestMatchers("/auth/**", "/test-connection", "/send-otp", "/verify-otp").permitAll()
-                .requestMatchers("/ws/**").permitAll() // ✅ WebSocket handshake permitted
+                .requestMatchers("/ws/**").permitAll()
                 .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-                .requestMatchers("/api/settings/**").authenticated()
+
+                // ✅ Your new settings endpoints
+                .requestMatchers("/api/settings/**").hasAnyAuthority("ROLE_USER", "ROLE_ADMIN")
 
                 // ✅ Stream endpoints
                 .requestMatchers("/stream/**").permitAll()
@@ -49,7 +51,7 @@ public class SecurityConfig {
                 // ✅ Device actions
                 .requestMatchers("/api/disconnect_camera").hasAnyAuthority("ROLE_USER", "ROLE_ADMIN")
 
-                // 🔐 Authenticated APIs
+                // ✅ Authenticated APIs
                 .requestMatchers("/api/cameras/connected/**").hasAnyAuthority("ROLE_USER", "ROLE_ADMIN")
                 .requestMatchers(
                     "/dashboard/**",
@@ -62,11 +64,13 @@ public class SecurityConfig {
                     "/api/logs/**"
                 ).hasAnyAuthority("ROLE_USER", "ROLE_ADMIN")
 
-                // 🔐 Catch-all
+                // ✅ Catch-all
                 .anyRequest().authenticated()
             );
 
+        // ✅ Place JWT filter before Spring Auth filter
         http.addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
+
         return http.build();
     }
 
@@ -84,7 +88,7 @@ public class SecurityConfig {
             "https://backend-gwq0.onrender.com"
         ));
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
-        config.setAllowedHeaders(List.of("Authorization", "Content-Type", "Accept"));
+        config.setAllowedHeaders(List.of("Authorization", "Content-Type", "Accept")); // ✅ Authorization allowed
         config.setExposedHeaders(List.of("Authorization"));
         config.setAllowCredentials(true);
         config.setMaxAge(3600L);
