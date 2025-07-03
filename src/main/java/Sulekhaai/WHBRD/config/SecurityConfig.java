@@ -39,6 +39,7 @@ public class SecurityConfig {
                 .requestMatchers("/auth/**", "/test-connection", "/send-otp", "/verify-otp").permitAll()
                 .requestMatchers("/ws/**").permitAll() // ✅ WebSocket handshake permitted
                 .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+                .requestMatchers("/api/settings/**").authenticated()
 
                 // ✅ Stream endpoints
                 .requestMatchers("/stream/**").permitAll()
