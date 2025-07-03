@@ -64,6 +64,7 @@ public class AuthController {
         user.setPassword(encoder.encode(password));
         user.setName(name);
         user.setRole("ROLE_USER");
+        user.setCameras(new HashSet<>());
         userRepo.save(user);
  
         return ResponseEntity.ok(Map.of(
