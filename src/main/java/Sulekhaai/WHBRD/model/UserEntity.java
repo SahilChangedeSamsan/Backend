@@ -18,6 +18,10 @@ public class UserEntity {
     private String password;
     private String role;
 
+    // ✅ NEW: Field for storing TOTP secret for Google Authenticator
+    @Column(name = "otp_secret")
+    private String otpSecret;
+
     @ManyToMany
     @JoinTable(
         name = "user_camera",
@@ -25,6 +29,8 @@ public class UserEntity {
         inverseJoinColumns = @JoinColumn(name = "camera_id")
     )
     private Set<Camera> cameras = new HashSet<>();
+
+    // --- Getters & Setters ---
 
     public Long getId() { return id; }
 
@@ -45,6 +51,10 @@ public class UserEntity {
     public String getRole() { return role; }
 
     public void setRole(String role) { this.role = role; }
+
+    public String getOtpSecret() { return otpSecret; }
+
+    public void setOtpSecret(String otpSecret) { this.otpSecret = otpSecret; }
 
     public Set<Camera> getCameras() { return cameras; }
 
