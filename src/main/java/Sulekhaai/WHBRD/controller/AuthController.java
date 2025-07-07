@@ -20,8 +20,7 @@ import java.util.*;
 @RequestMapping("/auth")
 @CrossOrigin(origins = {
     "http://localhost:5173",
-    "http://192.168.1.63:5173",
-    "https://sulekha-ai.netlify.app" // ✅ Add production Netlify frontend
+    "http://192.168.1.63:5173"
 })
 public class AuthController {
 
@@ -53,25 +52,17 @@ public class AuthController {
             ));
         }
 
-        // ✅ Generate OTP secret using Google Authenticator
-        GoogleAuthenticator gAuth = new GoogleAuthenticator();
-        GoogleAuthenticatorKey key = gAuth.createCredentials();
-        String otpSecret = key.getKey();
-        String otpUrl = GoogleAuthenticatorQRGenerator.getOtpAuthURL("SulekhaAI", email, key);
-
         UserEntity user = new UserEntity();
         user.setEmail(email);
         user.setPassword(encoder.encode(password));
         user.setName(name);
         user.setRole("ROLE_USER");
         user.setCameras(new HashSet<>());
-        user.setOtpSecret(otpSecret); // Store secret in DB
         userRepo.save(user);
 
         return ResponseEntity.ok(Map.of(
             "success", true,
-            "message", "User registered successfully",
-            "otpQr", otpUrl  // Can be shown to user on frontend
+            "message", "User registered"
         ));
     }
 
@@ -92,13 +83,13 @@ public class AuthController {
         Optional<UserEntity> userOpt = userRepo.findByEmail(email);
         if (userOpt.isPresent() && encoder.matches(password, userOpt.get().getPassword())) {
             UserEntity user = userOpt.get();
-            return ResponseEntity.ok(Map.of(
-                "success", true,
-                "message", "Password matched. Awaiting OTP verification",
-                "requiresOtp", true,
-                "userId", user.getId(),
-                "email", user.getEmail()
-            ));
+            String token = jwtUtil.generateToken(user.getEmail(), user.getId(), user.getRole());
+            Map<String, Object> res = new HashMap<>();
+            res.put("success", true);
+            res.put("token", token);
+            res.put("role", user.getRole());
+            res.put("userId", user.getId());
+            return ResponseEntity.ok(res);
         }
 
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Map.of(
@@ -107,9 +98,46 @@ public class AuthController {
         ));
     }
 
+    // ---------------------- SEND OTP ---------------------- //
+    @PostMapping(value = "/send-otp", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<Map<String, Object>> sendOtp(@RequestBody Map<String, String> req) {
+        String email = req.get("email");
+
+        if (email == null || email.trim().isEmpty()) {
+            return ResponseEntity.badRequest().body(Map.of(
+                "success", false,
+                "message", "Email is required"
+            ));
+        }
+
+        try {
+            String otp = otpService.generateOtp(email);
+            emailService.sendOtpEmail(email, otp);
+            return ResponseEntity.ok(Map.of(
+                "success", true,
+                "message", "OTP sent to " + email
+            ));
+        } catch (Exception e) {
+            System.err.println("[ERROR] Failed to send OTP: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of(
+                "success", false,
+                "message", "Failed to send OTP. Please try again."
+            ));
+        }
+    }
+
     // ---------------------- VERIFY OTP ---------------------- //
-    @PostMapping("/verify-otp")
-    public ResponseEntity<Map<String, Object>> verifyOtp(@RequestBody Map<String, String> req) {
+    @PostMapping(value = "/verify-otp", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<Map<String, Object>> verifyOtp(@RequestBody(required = false) Map<String, String> req) {
+        System.out.println("[DEBUG] /auth/verify-otp called");
+
+        if (req == null || !req.containsKey("email") || !req.containsKey("otp")) {
+            return ResponseEntity.badRequest().body(Map.of(
+                "success", false,
+                "message", "Email and OTP are required in request body"
+            ));
+        }
+
         String email = req.get("email");
         String otp = req.get("otp");
 
@@ -120,31 +148,30 @@ public class AuthController {
             ));
         }
 
-        Optional<UserEntity> userOpt = userRepo.findByEmail(email);
-        if (userOpt.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of(
-                "success", false,
-                "message", "User not found"
-            ));
-        }
-
-        UserEntity user = userOpt.get();
-        GoogleAuthenticator gAuth = new GoogleAuthenticator();
-        boolean isValid = gAuth.authorize(user.getOtpSecret(), Integer.parseInt(otp));
-
+        boolean isValid = otpService.verifyOtp(email, otp);
         if (isValid) {
-            String token = jwtUtil.generateToken(email, user.getId(), user.getRole());
-            return ResponseEntity.ok(Map.of(
-                "success", true,
-                "message", "OTP verified successfully",
-                "token", token,
-                "role", user.getRole(),
-                "userId", user.getId()
-            ));
+            System.out.println("[DEBUG] OTP verified successfully for: " + email);
+            Optional<UserEntity> userOpt = userRepo.findByEmail(email);
+            if (userOpt.isPresent()) {
+                String token = jwtUtil.generateToken(email, userOpt.get().getId(), userOpt.get().getRole());
+                return ResponseEntity.ok(Map.of(
+                    "success", true,
+                    "message", "OTP verified successfully",
+                    "token", token,
+                    "role", userOpt.get().getRole(),
+                    "userId", userOpt.get().getId()
+                ));
+            } else {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of(
+                    "success", false,
+                    "message", "User not found"
+                ));
+            }
         } else {
+            System.out.println("[DEBUG] OTP verification failed for: " + email);
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of(
                 "success", false,
-                "message", "Invalid OTP"
+                "message", "Invalid or expired OTP"
             ));
         }
     }
