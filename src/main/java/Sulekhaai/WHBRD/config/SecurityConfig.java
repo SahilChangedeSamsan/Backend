@@ -41,7 +41,7 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
 
                 // ✅ Your new settings endpoints
-                .requestMatchers("/api/settings/**").hasAnyAuthority("ROLE_USER", "ROLE_ADMIN")
+                .requestMatchers("/api/settings/**").permitAll()
 
                 // ✅ Stream endpoints
                 .requestMatchers("/stream/**").permitAll()
