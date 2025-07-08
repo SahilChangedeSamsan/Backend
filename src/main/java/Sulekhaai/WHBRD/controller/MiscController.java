@@ -22,13 +22,15 @@ public class MiscController {
      */
     @GetMapping("/utils/timezones")
     public List<Map<String, String>> timezones() {
-        return List.of(
-            Map.of(
-                "name", "Asia/Kolkata",
-                "country", "IN",
-                "localTime", LocalTime.now().toString()
-            )
-        );
+        List<Map<String, String>> tzList = new java.util.ArrayList<>();
+        for (String tz : java.time.ZoneId.getAvailableZoneIds()) {
+            java.time.ZonedDateTime now = java.time.ZonedDateTime.now(java.time.ZoneId.of(tz));
+            tzList.add(Map.of(
+                "name", tz,
+                "localTime", now.toLocalTime().toString()
+            ));
+        }
+        return tzList;
     }
 
     /**
