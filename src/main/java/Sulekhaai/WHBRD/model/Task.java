@@ -12,6 +12,7 @@ public class Task {
 
     private String userEmail;
     private String text;
-    private String date; // ISO yyyy-MM-dd
+    @Column(name = "date")
+    private java.time.LocalDate date;
     private boolean done;
 } 
