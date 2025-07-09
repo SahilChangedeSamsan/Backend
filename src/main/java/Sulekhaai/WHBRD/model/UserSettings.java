@@ -18,6 +18,7 @@ public class UserSettings {
     private String headline;
     private String biography;
     private String language;
+    private String theme; // 'light' or 'dark'
     @Lob
     @Column(length = 100000)
     private String profilePhoto;
