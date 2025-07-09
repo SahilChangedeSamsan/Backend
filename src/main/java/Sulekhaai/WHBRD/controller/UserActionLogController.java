@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -15,20 +16,23 @@ public class UserActionLogController {
     @Autowired
     private UserActionLogRepository logRepo;
 
+    @GetMapping
+    public List<UserActionLog> getAllLogs() {
+        return logRepo.findAll();
+    }
+
     @PostMapping
     public UserActionLog logAction(@RequestBody Map<String, String> payload, Principal principal) {
         UserActionLog log = new UserActionLog();
-        // If userId is provided, use it; otherwise, try to extract from principal (if JWT is set up)
+        // Accept both userId/details or username/action for backward compatibility
         if (payload.containsKey("userId")) {
-            log.setUserId(Long.parseLong(payload.get("userId")));
+            try { log.setUserId(Long.parseLong(payload.get("userId"))); } catch (Exception ignored) {}
         } else if (principal != null) {
-            try {
-                log.setUserId(Long.parseLong(principal.getName()));
-            } catch (Exception ignored) {}
+            try { log.setUserId(Long.parseLong(principal.getName())); } catch (Exception ignored) {}
         }
-        log.setAction(payload.getOrDefault("action", "unknown"));
-        log.setDetails(payload.getOrDefault("details", ""));
-        log.setTimestamp(LocalDateTime.now());
+        log.setAction(payload.getOrDefault("action", payload.getOrDefault("details", "unknown")));
+        log.setDetails(payload.getOrDefault("details", payload.getOrDefault("action", "")));
+        log.setTimestamp(java.time.LocalDateTime.now());
         return logRepo.save(log);
     }
 } 
