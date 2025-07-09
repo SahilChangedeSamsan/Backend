@@ -5,6 +5,7 @@ import Sulekhaai.WHBRD.repository.TaskRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
@@ -17,7 +18,7 @@ public class TaskController {
     @GetMapping
     public List<Task> getTasks(@RequestParam String email, @RequestParam(required = false) String date) {
         if (date != null && !date.isBlank()) {
-            return taskRepo.findByUserEmailAndDate(email, date);
+            return taskRepo.findByUserEmailAndDate(email, LocalDate.parse(date));
         } else {
             return taskRepo.findByUserEmail(email);
         }
