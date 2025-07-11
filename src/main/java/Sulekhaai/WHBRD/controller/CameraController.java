@@ -16,6 +16,7 @@ import java.util.stream.Collectors;
         origins = {"http://localhost:5173", "http://192.168.1.63:5173"},
         allowCredentials = "true")
 @RestController
+@RequestMapping("/api")
 public class CameraController {
 
     @Autowired
