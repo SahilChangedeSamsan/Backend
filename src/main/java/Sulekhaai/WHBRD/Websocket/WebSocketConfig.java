@@ -21,7 +21,7 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
                     "http://localhost:5173",
                     "http://192.168.1.63:5173",
                     "http://192.168.1.63:5174",
-                    "https://sulekha-aii.netlify.app"
+                    "https://sulekha-ai.netlify.app"
                 ); // ✅ Add Render frontend too if needed
         // ⚠️ Do not add .withSockJS() unless your frontend explicitly uses SockJS
     }
