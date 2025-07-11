@@ -32,6 +32,10 @@ public class CameraService {
                   .orElse(new ArrayList<>());
 }
 
+    public Optional<Camera> getCameraByCameraId(String cameraId) {
+        return cameraRepo.findByCameraId(cameraId);
+    }
+
 
     /**
      * Get all logs for a specific user.

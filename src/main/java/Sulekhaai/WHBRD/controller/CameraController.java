@@ -75,15 +75,12 @@ public class CameraController {
 
     @GetMapping("/cameras/{cameraId}/status")
     public ResponseEntity<?> getCameraStatus(@PathVariable String cameraId) {
-        Long cid;
-        try {
-            cid = Long.parseLong(cameraId);
-        } catch (NumberFormatException ex) {
+        var camOpt = cameraService.getCameraByCameraId(cameraId);
+        if (camOpt.isEmpty()) {
             return ResponseEntity.badRequest()
                     .body(Map.of("success", false, "message", "Invalid cameraId"));
         }
-
-        boolean online = cameraService.isCameraAvailable(cid);
+        boolean online = camOpt.get().isActive();
         return ResponseEntity.ok(Map.of("available", online));
     }
 
