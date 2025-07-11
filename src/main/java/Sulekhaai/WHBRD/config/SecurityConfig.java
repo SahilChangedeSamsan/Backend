@@ -86,7 +86,7 @@ public class SecurityConfig {
             "http://127.0.0.1:5173",
             "http://127.0.0.1:3000",
             // Production
-            "https://sulekha-ai.netlify.app",
+            "https://sulekha-aii.netlify.app",
             "https://backend-gwq0.onrender.com"
         ));
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
