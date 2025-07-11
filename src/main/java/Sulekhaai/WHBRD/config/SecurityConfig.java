@@ -65,7 +65,6 @@ public class SecurityConfig {
                     "/get_connected_devices/**",
                     "/api/logs/**"
                 ).hasAnyAuthority("ROLE_USER", "ROLE_ADMIN")
-                .requestMatchers("/api/meeting/create", "/api/meeting/join").permitAll()
 
                 // ✅ Catch-all
                 .anyRequest().authenticated()
