@@ -13,6 +13,7 @@ public class SettingsService {
 
     @Autowired private UserSettingsRepository settingsRepo;
     @Autowired private SyncStatusRepo   syncRepo;
+    @Autowired private UserRepository userRepo;
 
     public UserSettings getProfile(String email) {
         return settingsRepo.findByEmail(email).orElse(null);
@@ -39,5 +40,9 @@ public class SettingsService {
                            s.setStatus("Idle");
                            return s;
                        });
+    }
+
+    public java.util.Optional<UserEntity> getUserById(Long id) {
+        return userRepo.findById(id);
     }
 }

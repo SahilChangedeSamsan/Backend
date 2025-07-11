@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.*;
 import java.time.LocalTime;
 import java.util.List;
 import java.util.Map;
+import org.springframework.http.ResponseEntity;
 
 @RestController
 @RequestMapping("/api")  // Base path for all below endpoints
@@ -50,5 +51,26 @@ public class MiscController {
     @GetMapping(value = "/user/download-settings", produces = "application/json")
     public UserSettings download(@RequestParam String email) {
         return service.getProfile(email);
+    }
+
+    /**
+     * Get user info by userId (excluding password)
+     * Example: GET /api/user/{id}
+     */
+    @GetMapping("/user/{id}")
+    public ResponseEntity<?> getUserById(@PathVariable Long id) {
+        var userOpt = service.getUserById(id);
+        if (userOpt.isPresent()) {
+            var user = userOpt.get();
+            // Exclude password
+            return ResponseEntity.ok(Map.of(
+                "id", user.getId(),
+                "email", user.getEmail(),
+                "name", user.getName(),
+                "role", user.getRole()
+            ));
+        } else {
+            return ResponseEntity.status(404).body(Map.of("error", "User not found"));
+        }
     }
 }
