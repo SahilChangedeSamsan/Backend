@@ -1,4 +1,4 @@
-package com.yourpackage.controller;
+package Sulekhaai.WHBRD.controller;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
