@@ -20,15 +20,15 @@ import java.util.Map;
 })
 public class ChatController {
 
-    @Value("${openai.api.key:}")
-    private String openaiApiKey;
+    @Value("#{systemEnvironment['OPENAI_API_KEY']}")
+private String openaiApiKey;
 
     private OpenAiService openAiService;
 
     @PostConstruct
     public void init() {
         if (openaiApiKey == null || openaiApiKey.isBlank()) {
-            System.err.println("[ERROR] OpenAI API key is missing. Please set 'openai.api.key' in environment variables.");
+            System.err.println("[ERROR] OpenAI API key is missing. Please set 'OPENAI_API_KEY' in the environment.");
         } else {
             this.openAiService = new OpenAiService(openaiApiKey);
         }
