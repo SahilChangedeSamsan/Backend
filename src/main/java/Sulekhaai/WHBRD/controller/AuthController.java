@@ -90,6 +90,11 @@ public class AuthController {
         Optional<UserEntity> userOpt = userRepo.findByEmail(email);
         if (userOpt.isPresent() && encoder.matches(password, userOpt.get().getPassword())) {
             UserEntity user = userOpt.get();
+            // Ensure user has a role
+            if (user.getRole() == null || user.getRole().isBlank()) {
+                user.setRole("ROLE_USER");
+                userRepo.save(user);
+            }
             String token = jwtUtil.generateToken(user.getEmail(), user.getId(), user.getRole());
             return ResponseEntity.ok(Map.of(
                     "success", true,
@@ -181,5 +186,55 @@ public class AuthController {
                     "message", "Invalid or expired OTP"
             ));
         }
+    }
+
+    // ---------------------- RESET PASSWORD ---------------------- //
+    @PostMapping("/reset-password")
+    public ResponseEntity<Map<String, Object>> resetPassword(@RequestBody Map<String, String> req) {
+        String email = req.get("email");
+        String otp = req.get("otp");
+        String newPassword = req.get("newPassword");
+
+        if (email == null || otp == null || newPassword == null ||
+            email.isBlank() || otp.isBlank() || newPassword.isBlank()) {
+            return ResponseEntity.badRequest().body(Map.of(
+                "success", false,
+                "message", "Email, OTP, and new password are required"
+            ));
+        }
+
+        // Verify OTP
+        boolean isValid = otpService.verifyOtp(email, otp);
+        if (!isValid) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of(
+                "success", false,
+                "message", "Invalid or expired OTP"
+            ));
+        }
+
+        // Find user and update password
+        Optional<UserEntity> userOpt = userRepo.findByEmail(email);
+        if (userOpt.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of(
+                "success", false,
+                "message", "User not found"
+            ));
+        }
+        UserEntity user = userOpt.get();
+        user.setPassword(encoder.encode(newPassword));
+        userRepo.save(user);
+
+        return ResponseEntity.ok(Map.of(
+            "success", true,
+            "message", "Password reset successfully"
+        ));
+    }
+
+    // --- Get user by ID ---
+    @GetMapping("/api/user/{id}")
+    public ResponseEntity<UserEntity> getUserById(@PathVariable Long id) {
+        return userRepo.findById(id)
+            .map(ResponseEntity::ok)
+            .orElse(ResponseEntity.notFound().build());
     }
 }

@@ -23,6 +23,12 @@ public class UserActionLogController {
         return logRepo.findAll();
     }
 
+    // POST save a log (duplicate for /api/logs)
+    @PostMapping("")
+    public UserActionLog logActionRoot(@RequestBody Map<String, String> payload, Principal principal) {
+        return logAction(payload, principal);
+    }
+
     // POST save a log
     @PostMapping("/save")
     public UserActionLog logAction(@RequestBody Map<String, String> payload, Principal principal) {

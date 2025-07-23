@@ -13,7 +13,7 @@ public class GoogleConfig {   // <-- rename class here to match filename
     @Bean
     public GoogleIdTokenVerifier googleIdTokenVerifier() {
         return new GoogleIdTokenVerifier.Builder(Utils.getDefaultTransport(), Utils.getDefaultJsonFactory())
-                .setAudience(Collections.singletonList("511398362528-45to0fhd9m86dkmeiek45a4o7uu7d5t5.apps.googleusercontent.com"))
+                .setAudience(Collections.singletonList(" 13015010561-ljac6odfbd7en7qq89s7a14m8gvi1a9n.apps.googleusercontent.com "))
                 .build();
     }
 }
