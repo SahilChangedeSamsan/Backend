@@ -8,6 +8,9 @@ import org.springframework.web.bind.annotation.*;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.GrantedAuthority;
 
 @RestController
 @RequestMapping("/api/tasks")
@@ -26,6 +29,11 @@ public class TaskController {
 
     @PostMapping
     public Task addTask(@RequestBody Task task) {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        System.out.println("Authenticated user: " + auth.getName());
+        for (GrantedAuthority authority : auth.getAuthorities()) {
+            System.out.println("Authority: " + authority.getAuthority());
+        }
         return taskRepo.save(task);
     }
 

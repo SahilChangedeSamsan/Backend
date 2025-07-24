@@ -60,6 +60,11 @@ public class SecurityConfig {
                     "/api/logs/**"
                 ).hasAnyAuthority("ROLE_USER", "ROLE_ADMIN")
 
+                // Task endpoints
+                .requestMatchers(HttpMethod.POST, "/api/tasks", "/api/tasks/**").hasAnyAuthority("ROLE_USER", "ROLE_ADMIN")
+                .requestMatchers(HttpMethod.PUT, "/api/tasks/**").hasAnyAuthority("ROLE_USER", "ROLE_ADMIN")
+                .requestMatchers(HttpMethod.DELETE, "/api/tasks/**").hasAnyAuthority("ROLE_USER", "ROLE_ADMIN")
+
                 // Catch-all
                 .anyRequest().authenticated()
             );
