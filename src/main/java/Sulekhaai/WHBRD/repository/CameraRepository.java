@@ -8,9 +8,9 @@ import java.util.Optional;
 
 public interface CameraRepository extends JpaRepository<Camera, Long> {
 
-    // ✅ FIXED: Correct method name for ManyToMany user-camera lookup
+    // Get all cameras linked to a user (ManyToMany)
     List<Camera> findByUsers_Id(Long userId);
 
-    // ✅ Used for linking/disconnecting by string-based cameraId
+    // Find camera by string-based ID
     Optional<Camera> findByCameraId(String cameraId);
 }

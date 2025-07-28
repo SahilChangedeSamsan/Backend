@@ -27,11 +27,10 @@ public class CameraService {
      * Get all cameras linked to a specific user.
      */
     public List<Camera> getCamerasByUserId(Long userId) {
-    Optional<UserEntity> userOpt = userRepo.findById(userId);
-    return userOpt.map(user -> new ArrayList<>(user.getCameras()))
-                  .orElse(new ArrayList<>());
-}
-
+        return userRepo.findById(userId)
+                .map(user -> new ArrayList<>(user.getCameras()))
+                .orElseGet(ArrayList::new);
+    }
 
     /**
      * Get all logs for a specific user.
@@ -48,7 +47,7 @@ public class CameraService {
             logRepo.deleteByUserId(userId);
             return true;
         } catch (Exception e) {
-            e.printStackTrace();  // Helps identify any DB issues
+            e.printStackTrace(); // Log DB issues
             return false;
         }
     }
@@ -78,7 +77,7 @@ public class CameraService {
 
             UserEntity user = userOpt.get();
 
-            // Fetch existing camera or create new
+            // Fetch existing camera or create new one
             Camera camera = cameraRepo.findByCameraId(cameraId).orElseGet(() -> {
                 Camera newCam = new Camera();
                 newCam.setCameraId(cameraId);
@@ -89,12 +88,12 @@ public class CameraService {
                 return newCam;
             });
 
-            // Update device name if camera already exists
+            // Update camera status and name (in case it was renamed)
             camera.setDeviceName(deviceName);
             camera.setActive(true);
             camera.setOnline(true);
 
-            // Link user and camera bidirectionally
+            // Bi-directional linking
             camera.getUsers().add(user);
             user.getCameras().add(camera);
 
@@ -103,14 +102,14 @@ public class CameraService {
 
             return true;
         } catch (Exception e) {
-            e.printStackTrace();
+            e.printStackTrace(); // Debug
             return false;
         }
     }
 
     /**
      * Disconnect a user from a camera.
-     * If no users are left, mark the camera as inactive and offline.
+     * If no users are left, mark the camera inactive and offline.
      */
     public boolean disconnectCamera(Map<String, Object> req) {
         try {
@@ -125,11 +124,11 @@ public class CameraService {
             Camera camera = cameraOpt.get();
             UserEntity user = userOpt.get();
 
-            // Remove associations
+            // Unlink camera and user
             camera.getUsers().remove(user);
             user.getCameras().remove(camera);
 
-            // If no users remain, mark camera inactive
+            // If no users remain linked, deactivate the camera
             if (camera.getUsers().isEmpty()) {
                 camera.setActive(false);
                 camera.setOnline(false);
@@ -140,7 +139,7 @@ public class CameraService {
 
             return true;
         } catch (Exception e) {
-            e.printStackTrace();
+            e.printStackTrace(); // Log error
             return false;
         }
     }

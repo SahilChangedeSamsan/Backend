@@ -13,7 +13,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 @CrossOrigin(
-        origins = {"http://localhost:5173", "http://192.168.1.63:5173","https://sulekha-aii.netlify.app"},
+        origins = {"http://localhost:5173", "http://192.168.1.63:5173", "https://sulekha-aii.netlify.app"},
         allowCredentials = "true")
 @RestController
 @RequestMapping("/api")
@@ -35,10 +35,9 @@ public class CameraController {
 
         List<Camera> cams = cameraService.getCamerasByUserId(uid);
 
-        // Return the custom cameraId instead of internal DB id
         List<Map<String, Object>> devices = cams.stream().map(cam -> {
             Map<String, Object> map = new HashMap<>();
-            map.put("cameraId", cam.getCameraId()); // ✅ return user-defined cameraId
+            map.put("cameraId", cam.getCameraId());
             map.put("deviceName", cam.getDeviceName());
             return map;
         }).collect(Collectors.toList());
@@ -94,7 +93,8 @@ public class CameraController {
                 "message", ok ? "Camera linked" : "Link failed"));
     }
 
-    @PostMapping("/api/disconnect_camera")
+    // ✅ FIXED endpoint
+    @PostMapping("/disconnect_camera")
     public ResponseEntity<Map<String, Object>> disconnectCamera(@RequestBody Map<String, Object> req) {
         boolean result = cameraService.disconnectCamera(req);
         if (result) {
@@ -103,5 +103,4 @@ public class CameraController {
             return ResponseEntity.status(500).body(Map.of("success", false, "message", "Failed to disconnect"));
         }
     }
-
 }

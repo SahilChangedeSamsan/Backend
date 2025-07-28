@@ -43,6 +43,8 @@ public class AuthController {
         String email = req.get("email");
         String password = req.get("password");
         String name = req.get("name");
+        // Ignore any 'role' field in the request
+        // Always set role to ROLE_USER
 
         if (email == null || password == null || name == null ||
                 email.isBlank() || password.isBlank() || name.isBlank()) {
@@ -63,7 +65,7 @@ public class AuthController {
         user.setEmail(email);
         user.setPassword(encoder.encode(password));
         user.setName(name);
-        user.setRole("ROLE_USER");
+        user.setRole("ROLE_USER"); // Always set to ROLE_USER
         user.setCameras(new HashSet<>());
         userRepo.save(user);
 
