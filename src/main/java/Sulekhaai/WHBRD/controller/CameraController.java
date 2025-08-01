@@ -39,6 +39,8 @@ public class CameraController {
             Map<String, Object> map = new HashMap<>();
             map.put("cameraId", cam.getCameraId());
             map.put("deviceName", cam.getDeviceName());
+            map.put("status", cam.isOnline() ? "Online" : "Offline");
+            map.put("lastConnected", "Just now"); // You can enhance this with actual timestamp
             return map;
         }).collect(Collectors.toList());
 

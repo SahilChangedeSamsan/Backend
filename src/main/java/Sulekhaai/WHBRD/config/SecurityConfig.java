@@ -36,7 +36,7 @@ public class SecurityConfig {
             .authorizeHttpRequests(auth -> auth
                 // Public endpoints
                 .requestMatchers("/", "/index.html", "/error").permitAll()
-                .requestMatchers("/auth/**", "/test-connection", "/send-otp", "/verify-otp").permitAll()
+                .requestMatchers("/auth/**", "/test-connection", "/send-otp", "/verify-otp", "/auth/debug/current-user").permitAll()
                 .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
 
                 // Stream endpoints

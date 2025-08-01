@@ -12,6 +12,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.*;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 
 @RestController
 @RequestMapping("/auth")
@@ -92,6 +94,7 @@ public class AuthController {
         Optional<UserEntity> userOpt = userRepo.findByEmail(email);
         if (userOpt.isPresent() && encoder.matches(password, userOpt.get().getPassword())) {
             UserEntity user = userOpt.get();
+            System.out.println("[DEBUG] Login successful for: " + user.getEmail() + ", Role: " + user.getRole());
             // Ensure user has a role
             if (user.getRole() == null || user.getRole().isBlank()) {
                 user.setRole("ROLE_USER");
@@ -167,13 +170,15 @@ public class AuthController {
             System.out.println("[DEBUG] OTP verified successfully for: " + email);
             Optional<UserEntity> userOpt = userRepo.findByEmail(email);
             if (userOpt.isPresent()) {
-                String token = jwtUtil.generateToken(email, userOpt.get().getId(), userOpt.get().getRole());
+                UserEntity user = userOpt.get();
+                System.out.println("[DEBUG] User found: " + user.getEmail() + ", Role: " + user.getRole());
+                String token = jwtUtil.generateToken(email, user.getId(), user.getRole());
                 return ResponseEntity.ok(Map.of(
                         "success", true,
                         "message", "OTP verified successfully",
                         "token", token,
-                        "role", userOpt.get().getRole(),
-                        "userId", userOpt.get().getId()
+                        "role", user.getRole(),
+                        "userId", user.getId()
                 ));
             } else {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of(
@@ -238,5 +243,77 @@ public class AuthController {
         return userRepo.findById(id)
             .map(ResponseEntity::ok)
             .orElse(ResponseEntity.notFound().build());
+    }
+
+    // --- Debug endpoint to check current user role ---
+    @GetMapping("/debug/current-user")
+    public ResponseEntity<Map<String, Object>> getCurrentUserRole() {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth != null && auth.isAuthenticated()) {
+            String email = auth.getName();
+            Optional<UserEntity> userOpt = userRepo.findByEmail(email);
+            if (userOpt.isPresent()) {
+                UserEntity user = userOpt.get();
+                return ResponseEntity.ok(Map.of(
+                    "email", user.getEmail(),
+                    "role", user.getRole(),
+                    "userId", user.getId(),
+                    "name", user.getName()
+                ));
+            }
+        }
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("error", "Not authenticated"));
+    }
+
+    // ---------------------- CHANGE PASSWORD ---------------------- //
+    @PostMapping("/change-password")
+    public ResponseEntity<Map<String, Object>> changePassword(@RequestBody Map<String, String> req) {
+        String email = req.get("email");
+        String currentPassword = req.get("currentPassword");
+        String newPassword = req.get("newPassword");
+
+        if (email == null || currentPassword == null || newPassword == null ||
+            email.isBlank() || currentPassword.isBlank() || newPassword.isBlank()) {
+            return ResponseEntity.badRequest().body(Map.of(
+                "success", false,
+                "message", "Email, current password, and new password are required"
+            ));
+        }
+
+        // Find user
+        Optional<UserEntity> userOpt = userRepo.findByEmail(email);
+        if (userOpt.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of(
+                "success", false,
+                "message", "User not found"
+            ));
+        }
+
+        UserEntity user = userOpt.get();
+
+        // Verify current password
+        if (!encoder.matches(currentPassword, user.getPassword())) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of(
+                "success", false,
+                "message", "Current password is incorrect"
+            ));
+        }
+
+        // Check if new password is different from current
+        if (encoder.matches(newPassword, user.getPassword())) {
+            return ResponseEntity.badRequest().body(Map.of(
+                "success", false,
+                "message", "New password must be different from current password"
+            ));
+        }
+
+        // Update password
+        user.setPassword(encoder.encode(newPassword));
+        userRepo.save(user);
+
+        return ResponseEntity.ok(Map.of(
+            "success", true,
+            "message", "Password changed successfully"
+        ));
     }
 }
