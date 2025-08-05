@@ -49,12 +49,12 @@ public class SettingsController {
             }
 
             // Save or update settings
-            Optional<UserSettings> existing = settingsRepo.findByEmail(settings.getEmail());
-            if (existing.isPresent()) {
-                settings.setId(existing.get().getId()); // preserve same ID
-            }
+        Optional<UserSettings> existing = settingsRepo.findByEmail(settings.getEmail());
+        if (existing.isPresent()) {
+            settings.setId(existing.get().getId()); // preserve same ID
+        }
             
-            UserSettings saved = settingsRepo.save(settings);
+        UserSettings saved = settingsRepo.save(settings);
             return ResponseEntity.ok(Map.of(
                 "success", true,
                 "message", "Settings saved successfully",
